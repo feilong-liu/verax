@@ -19,16 +19,21 @@ on:
     branches:
       - main
     paths:
-      - '**'
-      - '!*.md'
-      - '!docs/**'
-      - '!.github/workflows/*.md'
+      - axiom/**
+      - velox/**
+      - '!velox/docs/**'
+      - CMakeLists.txt
+      - .github/workflows/build_and_test.yml
+      - Makefile
+
   pull_request:
     paths:
-      - '**'
-      - '!*.md'
-      - '!docs/**'
-      - '!.github/workflows/*.md'
+      - axiom/**
+      - velox/**
+      - '!velox/docs/**'
+      - CMakeLists.txt
+      - .github/workflows/build_and_test.yml
+      - Makefile
 
 permissions:
   contents: read
