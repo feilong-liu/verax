@@ -117,6 +117,17 @@ jobs:
           ccache -s
           echo "=== End Clear Statistics ==="
 
+      # Configure with CMake to see the debug logs from CMakeLists.txt
+      - name: Configure with CMake
+        env:
+          CPU_TARGET: "avx"
+        run: |
+          echo "=== CMake Configuration Step ==="
+          echo "Running cmake configure to see CMakeLists.txt debug logs..."
+          echo "CPU_TARGET: $CPU_TARGET"
+          make cmake BUILD_DIR=debug BUILD_TYPE=Debug
+          echo "=== CMake Configuration Completed ==="
+
       # Build Verax
       - name: Build Verax Debug
         id: build-verax
@@ -133,8 +144,8 @@ jobs:
           echo "Available CPU cores:"
           nproc
           echo "=== Starting Verax Debug Build ==="
-          # Build with reduced parallelism
-          make debug
+          # Build only (cmake already done)
+          make build BUILD_DIR=debug
           echo "=== Build Completed ==="
 
       # Display ccache statistics after build
