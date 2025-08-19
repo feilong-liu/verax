@@ -18,13 +18,13 @@ add_subdirectory(connectors)
 
 add_library(velox_md_model Model.cpp)
 
-target_link_libraries(velox_md_model velox_exception)
-
+target_link_libraries(
+  velox_md_model velox_exception)
 
 add_library(velox_schema_resolver SchemaResolver.cpp SchemaUtils.cpp)
 
-target_link_libraries(velox_schema_resolver velox_connector_metadata
-                      velox_exception velox_vector)
+target_link_libraries(
+  velox_schema_resolver velox_connector_metadata velox_exception velox_vector)
 
 add_library(
   velox_verax
