@@ -395,6 +395,47 @@ class Call : public Expr {
 
 using CallCP = const Call*;
 
+struct SpecialFormCallNames {
+  static constexpr const char* kAnd = "and";
+  static constexpr const char* kOr = "or";
+  static constexpr const char* kCast = "cast";
+  static constexpr const char* kTryCast = "trycast";
+  static constexpr const char* kTry = "try";
+  static constexpr const char* kCoalesce = "coalesce";
+  static constexpr const char* kIf = "if";
+  static constexpr const char* kSwitch = "switch";
+  static constexpr const char* kIn = "in";
+
+  static const char* toCallName(const logical_plan::SpecialForm& form) {
+    namespace lp = facebook::velox::logical_plan;
+
+    switch (form) {
+      case lp::SpecialForm::kAnd:
+        return SpecialFormCallNames::kAnd;
+      case lp::SpecialForm::kOr:
+        return SpecialFormCallNames::kOr;
+      case lp::SpecialForm::kCast:
+        return SpecialFormCallNames::kCast;
+      case lp::SpecialForm::kTryCast:
+        return SpecialFormCallNames::kTryCast;
+      case lp::SpecialForm::kTry:
+        return SpecialFormCallNames::kTry;
+      case lp::SpecialForm::kCoalesce:
+        return SpecialFormCallNames::kCoalesce;
+      case lp::SpecialForm::kIf:
+        return SpecialFormCallNames::kIf;
+      case lp::SpecialForm::kSwitch:
+        return SpecialFormCallNames::kSwitch;
+      case lp::SpecialForm::kIn:
+        return SpecialFormCallNames::kIn;
+      default:
+        VELOX_FAIL(
+            "No function call name for special form: {}",
+            lp::SpecialFormName::toName(form));
+    }
+  }
+};
+
 /// True if 'expr' is a call to function 'name'.
 inline bool isCallExpr(ExprCP expr, Name name) {
   return expr->type() == PlanType::kCallExpr &&

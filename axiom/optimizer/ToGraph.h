@@ -40,6 +40,13 @@ struct BuiltinNames {
   Name multiply;
   Name _and;
   Name _or;
+  Name cast;
+  Name tryCast;
+  Name _try;
+  Name coalesce;
+  Name _if;
+  Name _switch;
+  Name in;
 
   folly::F14FastSet<Name> canonicalizable;
 };
@@ -261,11 +268,12 @@ class ToGraph {
   logical_plan::ConstantExprPtr tryFoldConstant(
       const logical_plan::ExprPtr expr);
 
-  // Returns a literal from applying 'call' or 'cast' to 'literals'. nullptr
-  // if not successful.
+  // Returns a literal by applying the function 'callName' with return type
+  // 'returnType' to the input arguments 'literals'. Returns nullptr if not
+  // successful. if not successful.
   ExprCP tryFoldConstant(
-      const logical_plan::CallExpr* call,
-      const logical_plan::SpecialFormExpr* cast,
+      const TypePtr& returnType,
+      const std::string& callName,
       const ExprVector& literals);
 
   // Converts 'name' to a deduplicated ExprCP. If 'name' is assigned to an

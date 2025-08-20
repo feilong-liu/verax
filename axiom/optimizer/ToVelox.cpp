@@ -150,7 +150,7 @@ void ToVelox::filterUpdated(BaseTableCP table, bool updateSelectivity) {
       remainingFilter = std::make_shared<core::CallTypedExpr>(
           BOOLEAN(),
           std::vector<core::TypedExprPtr>{remainingFilter, conjunct},
-          "and");
+          SpecialFormCallNames::kAnd);
     }
   }
 
@@ -237,6 +237,10 @@ RowTypePtr ToVelox::makeOutputType(const ColumnVector& columns) {
 }
 
 core::TypedExprPtr ToVelox::toAnd(const ExprVector& exprs) {
+  if (exprs.size() == 1) {
+    return toTypedExpr(exprs[0]);
+  }
+
   core::TypedExprPtr result;
   for (auto expr : exprs) {
     auto conjunct = toTypedExpr(expr);
@@ -244,7 +248,9 @@ core::TypedExprPtr ToVelox::toAnd(const ExprVector& exprs) {
       result = conjunct;
     } else {
       result = std::make_shared<core::CallTypedExpr>(
-          BOOLEAN(), std::vector<core::TypedExprPtr>{result, conjunct}, "and");
+          BOOLEAN(),
+          std::vector<core::TypedExprPtr>{result, conjunct},
+          SpecialFormCallNames::kAnd);
     }
   }
   return result;
@@ -395,8 +401,9 @@ core::TypedExprPtr ToVelox::toTypedExpr(ExprCP expr) {
     case PlanType::kCallExpr: {
       std::vector<core::TypedExprPtr> inputs;
       auto call = expr->as<Call>();
+      const auto& builtinNames = queryCtx()->optimization()->builtinNames();
 
-      if (call->name() == toName("in")) {
+      if (call->name() == builtinNames.in) {
         VELOX_USER_CHECK_GE(call->args().size(), 2);
         inputs.push_back(toTypedExpr(call->args().at(0)));
         inputs.push_back(createArrayForInList(*call, inputs.back()->type()));
@@ -406,9 +413,14 @@ core::TypedExprPtr ToVelox::toTypedExpr(ExprCP expr) {
         }
       }
 
-      if (call->name() == toName("cast")) {
+      if (call->name() == builtinNames.cast) {
         return std::make_shared<core::CastTypedExpr>(
             toTypePtr(expr->value().type), std::move(inputs), false);
+      }
+
+      if (call->name() == builtinNames.tryCast) {
+        return std::make_shared<core::CastTypedExpr>(
+            toTypePtr(expr->value().type), std::move(inputs), true);
       }
 
       return std::make_shared<core::CallTypedExpr>(
@@ -971,7 +983,10 @@ namespace {
 core::TypedExprPtr toAndWithAliases(
     const std::vector<core::TypedExprPtr>& exprs,
     const BaseTable* baseTable) {
-  auto result = std::make_shared<core::CallTypedExpr>(BOOLEAN(), exprs, "and");
+  auto result = exprs.size() == 1
+      ? exprs.at(0)
+      : std::make_shared<core::CallTypedExpr>(
+            BOOLEAN(), exprs, SpecialFormCallNames::kAnd);
 
   std::unordered_map<std::string, core::TypedExprPtr> mapping;
   for (const auto& column : baseTable->columns) {
