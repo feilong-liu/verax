@@ -69,7 +69,8 @@ TEST_F(HiveQueriesTest, basic) {
 }
 
 TEST_F(HiveQueriesTest, anyJoin) {
-  auto statement = parser().parse("SELECT * FROM nation JOIN region ON true");
+  auto statement =
+      duckParser().parse("SELECT * FROM nation JOIN region ON true");
 
   ASSERT_TRUE(statement->isSelect());
   auto logicalPlan = statement->asUnchecked<test::SelectStatement>()->plan();

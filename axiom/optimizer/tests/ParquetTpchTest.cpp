@@ -15,6 +15,7 @@
  */
 
 #include "axiom/optimizer/tests/ParquetTpchTest.h"
+#include "axiom/optimizer/connectors/tpch/TpchConnectorMetadata.h"
 #include "velox/common/file/FileSystems.h"
 #include "velox/connectors/hive/HiveConnector.h"
 #include "velox/connectors/tpch/TpchConnector.h"
@@ -80,6 +81,14 @@ void doCreateTables(const std::string& path) {
   }
 }
 
+void registerHiveConnector(const std::string& id) {
+  auto emptyConfig = std::make_shared<config::ConfigBase>(
+      std::unordered_map<std::string, std::string>());
+
+  connector::hive::HiveConnectorFactory factory;
+  connector::registerConnector(factory.newConnector(id, emptyConfig));
+}
+
 } // namespace
 
 std::shared_ptr<TempDirectoryPath> ParquetTpchTest::tempDirectory_;
@@ -121,12 +130,21 @@ void ParquetTpchTest::createTables() {
       std::string(PlanBuilder::kHiveDefaultConnectorId), emptyConfig);
   connector::registerConnector(std::move(hiveConnector));
 
-  connector::tpch::TpchConnectorFactory tpchConnectorFactory;
-  auto tpchConnector = tpchConnectorFactory.newConnector(
-      std::string(PlanBuilder::kTpchDefaultConnectorId), emptyConfig);
-  connector::registerConnector(std::move(tpchConnector));
+  registerTpchConnector(std::string(PlanBuilder::kTpchDefaultConnectorId));
 
   doCreateTables(createPath);
+}
+
+// static
+void ParquetTpchTest::registerTpchConnector(const std::string& id) {
+  connector::tpch::registerTpchConnectorMetadataFactory(
+      std::make_unique<connector::tpch::TpchConnectorMetadataFactoryImpl>());
+
+  auto emptyConfig = std::make_shared<config::ConfigBase>(
+      std::unordered_map<std::string, std::string>());
+
+  connector::tpch::TpchConnectorFactory factory;
+  connector::registerConnector(factory.newConnector(id, emptyConfig));
 }
 
 } // namespace facebook::velox::optimizer::test

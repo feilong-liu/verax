@@ -38,6 +38,8 @@ class ParquetTpchTest {
   /// Unregisters Hive and TPC-H connectors before returning.
   static void createTables();
 
+  static void registerTpchConnector(const std::string& id);
+
  private:
   static std::shared_ptr<exec::test::TempDirectoryPath> tempDirectory_;
 };

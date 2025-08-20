@@ -16,8 +16,9 @@
 
 #pragma once
 
+#include "axiom/optimizer/tests/DuckParser.h"
 #include "axiom/optimizer/tests/PlanMatcher.h"
-#include "axiom/optimizer/tests/QuerySqlParser.h"
+#include "axiom/optimizer/tests/PrestoParser.h"
 #include "axiom/optimizer/tests/QueryTestBase.h"
 
 namespace facebook::velox::optimizer::test {
@@ -26,14 +27,13 @@ class HiveQueriesTestBase : public test::QueryTestBase {
  protected:
   static void SetUpTestCase();
 
-  void SetUp() override {
-    test::QueryTestBase::SetUp();
-    parser_ = makeQueryParser();
-  }
+  static constexpr auto kTpchConnectorId = "tpch";
 
-  static void TearDownTestCase() {
-    LocalRunnerTestBase::TearDownTestCase();
-  }
+  void SetUp() override;
+
+  void TearDown() override;
+
+  static void TearDownTestCase();
 
   RowTypePtr getSchema(const std::string& tableName);
 
@@ -51,14 +51,17 @@ class HiveQueriesTestBase : public test::QueryTestBase {
       const PlanAndStats& plan,
       const std::shared_ptr<core::PlanMatcher>& matcher);
 
-  QuerySqlParser& parser() {
-    return *parser_;
+  DuckParser& duckParser() {
+    return *duckParser_;
   }
 
- private:
-  std::unique_ptr<QuerySqlParser> makeQueryParser();
+  PrestoParser& prestoParser() {
+    return *prestoParser_;
+  }
 
-  std::unique_ptr<QuerySqlParser> parser_;
+ protected:
+  std::unique_ptr<DuckParser> duckParser_;
+  std::unique_ptr<PrestoParser> prestoParser_;
 };
 
 } // namespace facebook::velox::optimizer::test
