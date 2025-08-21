@@ -14,8 +14,6 @@
 
 add_subdirectory(tests)
 
-find_package(antlr4-runtime REQUIRED)
-
 add_library(
   velox_presto_grammar_lib
   PrestoSqlBaseListener.cpp
