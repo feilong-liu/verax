@@ -20,4 +20,33 @@ The SQL parser here is almost an exact copy of the Presto Java SQL parser but wi
 
 The generated visitor APIs are meant to be implemented in order to create the AST classes representing the user defined ANTLR4 grammar.
 
-For now, the generated code is currently checked in by generating the ANTLR4 code and then copying the generated code into the `axio/sql/presto` directory using BUCK. Soon, the ANTLR4 generated code will be automatically done as part of the CMAKE build process (see https://github.com/antlr/antlr4/tree/dev/runtime/Cpp). In this way, all the user has to do is update the .g4 file, and the build process will take care of generating the antlr4 code. The user will then need to implement the new visitor APIs and create the respective AST classes.
+The ANTLR4 generated code is now automatically generated as part of the CMAKE build process (see https://github.com/antlr/antlr4/tree/dev/runtime/Cpp). When you update the `PrestoSql.g4` grammar file, the build process will automatically regenerate the ANTLR4 C++ code during compilation. You will then need to implement any new visitor APIs and create the respective AST classes for any grammar changes.
+
+## Build Requirements
+
+- **Java Runtime Environment (REQUIRED)**: ANTLR4 code generation requires Java to be installed
+- ANTLR4 C++ runtime and JAR are automatically managed by the CMake dependency system
+- **The build will fail if Java is not available** - this ensures generated code is always up-to-date
+
+## ANTLR4 Integration
+
+The ANTLR4 code generation is centrally managed by `/CMake/resolve_dependency_modules/antlr4-runtime.cmake`, which:
+
+1. Downloads the ANTLR4 C++ runtime
+2. Configures the ANTLR4 JAR for code generation
+3. Sets up the FindANTLR module paths
+4. Validates that Java is available for code generation
+
+This centralized approach ensures consistent ANTLR4 setup across all projects in the repository. **The build enforces that ANTLR4 code generation is working properly** rather than falling back to potentially outdated manually committed files.
+
+### Error Resolution
+
+If you encounter an error like:
+```
+ANTLR4 code generation is required but not available. Please ensure Java Runtime Environment is installed.
+```
+
+Install Java using your system package manager:
+- **macOS**: `brew install openjdk`
+- **Ubuntu/Debian**: `sudo apt-get install default-jre`
+- **CentOS/RHEL**: `sudo yum install java-11-openjdk`

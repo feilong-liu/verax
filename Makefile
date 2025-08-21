@@ -56,6 +56,7 @@ cmake: submodules	#: Use CMake to create a Makefile build system
 		$(GENERATOR) \
 		$(USE_CCACHE) \
 		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+		$(if $(findstring debug,$(BUILD_DIR)),--verbose) \
 		${EXTRA_CMAKE_FLAGS}
 
 build:            #: Build the software based in BUILD_DIR and BUILD_TYPE variables
