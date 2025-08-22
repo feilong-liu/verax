@@ -52,6 +52,12 @@ velox_link_libraries(
   velox_optimizer_tests_duck_parser velox_fe_logical_plan_builder
   velox_parse_parser velox_vector)
 
+velox_add_library(velox_optimizer_tests_presto_parser PrestoParser.cpp)
+
+velox_link_libraries(
+  velox_optimizer_tests_presto_parser velox_fe_logical_plan_builder
+  axiom_sql_presto_parser_helper axiom_sql_presto_ast)
+
 velox_add_library(velox_optimizer_tests_plan_matcher PlanMatcher.cpp)
 
 velox_link_libraries(
@@ -138,6 +144,25 @@ target_link_libraries(
   velox_parse_utils)
 
 add_subdirectory(utils)
+
+add_executable(velox_optimizer_tests_presto_parser_test PrestoParserTest.cpp)
+
+add_test(velox_optimizer_tests_presto_parser_test
+         velox_optimizer_tests_presto_parser_test)
+
+target_link_libraries(
+  velox_optimizer_tests_presto_parser_test
+  velox_optimizer_tests_presto_parser
+  velox_optimizer_tests_parquet_tpch
+  velox_optimizer_tests_query_test_base
+  axiom_optimizer_tests_utils
+  velox_tpch_connector_metadata
+  velox_functions_prestosql
+  velox_aggregates_prestosql
+  GTest::gmock
+  glog::glog
+  GTest::gtest
+  GTest::gtest_main)
 
 add_executable(velox_model_test ModelTest.cpp)
 

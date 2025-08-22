@@ -16,6 +16,7 @@
 
 #include "axiom/sql/presto/ast/AstBuilder.h"
 
+#include <any>
 #include "velox/common/base/Exceptions.h"
 
 namespace axiom::sql::presto {
@@ -59,12 +60,12 @@ void AstBuilder::trace(const std::string& name) const {
   }
 }
 
-antlrcpp::Any AstBuilder::visitSingleStatement(
+std::any AstBuilder::visitSingleStatement(
     PrestoSqlParser::SingleStatementContext* ctx) {
   return visit(ctx->statement());
 }
 
-antlrcpp::Any AstBuilder::visitQuery(PrestoSqlParser::QueryContext* ctx) {
+std::any AstBuilder::visitQuery(PrestoSqlParser::QueryContext* ctx) {
   trace("visitQuery");
 
   auto queryNoWith = visitTyped<Query>(ctx->queryNoWith());
@@ -97,8 +98,8 @@ antlrcpp::Any AstBuilder::visitQueryNoWith(
   auto limit = getText(ctx->limit);
 
   auto term = visit(ctx->queryTerm());
-  if (term.is<std::shared_ptr<QuerySpecification>>()) {
-    auto querySpec = term.as<std::shared_ptr<QuerySpecification>>();
+  try {
+    auto querySpec = std::any_cast<std::shared_ptr<QuerySpecification>>(term);
     return std::make_shared<Query>(
         getLocation(ctx),
         /*with*/ nullptr,
@@ -112,9 +113,9 @@ antlrcpp::Any AstBuilder::visitQueryNoWith(
         orderBy,
         offset,
         limit);
+  } catch (const std::bad_any_cast& e) {
+    throw std::runtime_error("Uninplemented for QueryNoWith");
   }
-
-  throw std::runtime_error("Uninplemented for QueryNoWith");
 }
 
 antlrcpp::Any AstBuilder::visitSelectSingle(

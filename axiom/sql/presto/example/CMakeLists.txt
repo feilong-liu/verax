@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory(grammar)
-add_subdirectory(ast)
-add_subdirectory(example)
+add_executable(axiom_sql_presto_parser_example ParserExample.cpp)
+
+target_link_libraries(
+  axiom_sql_presto_parser_example
+  axiom_sql_presto_ast
+  axiom_sql_presto_grammar
+  antlr4_shared
+  velox_common_base
+  velox_exception
+  fmt::fmt
+  folly)

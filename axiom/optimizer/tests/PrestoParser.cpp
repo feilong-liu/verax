@@ -16,6 +16,7 @@
 
 #include "axiom/optimizer/tests/PrestoParser.h"
 #include <algorithm>
+#include <any>
 #include <cctype>
 #include "axiom/logical_plan/PlanBuilder.h"
 #include "axiom/sql/presto/ParserHelper.h"
@@ -1071,8 +1072,8 @@ logical_plan::LogicalPlanNodePtr PrestoParser::doParse(
   auto* queryContext = helper.parse();
 
   sql::AstBuilder astBuilder(enableTracing);
-  auto query =
-      astBuilder.visit(queryContext).as<std::shared_ptr<sql::Statement>>();
+  auto query = std::any_cast<std::shared_ptr<sql::Statement>>(
+      astBuilder.visit(queryContext));
 
   if (enableTracing) {
     std::stringstream astString;

@@ -46,7 +46,8 @@ int main(int argc, char** argv) {
   }
 
   AstBuilder astBuilder;
-  auto query = astBuilder.visit(queryContext).as<std::shared_ptr<Query>>();
+  auto query =
+      std::any_cast<std::shared_ptr<Query>>(astBuilder.visit(queryContext));
 
   AstPrinter printer(std::cout);
   query->accept(&printer);

@@ -18,7 +18,7 @@ add_test(velox_presto_parser_test velox_presto_parser_test)
 
 target_link_libraries(
   velox_presto_parser_test
-  velox_presto_grammar_lib
+  axiom_sql_presto_grammar
   GTest::gtest
   GTest::gtest_main
   antlr4_shared)
